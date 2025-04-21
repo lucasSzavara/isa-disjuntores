@@ -1,0 +1,66 @@
+---
+title: "Análise de correspondência"
+output: pdf_document
+date: "2025-04-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Import
+
+```{r}
+library(MASS)
+library(ggplot2)
+library(tidyverse)
+```
+```{r}
+df <- read.csv('./dados/base_completa.csv') %>% 
+    filter(`Denominação` == 'Qualificacao do Equipamento')
+```
+
+```{r}
+fatores <- c(
+             # 'Fabricante',
+             # 'Modelo',
+             # 'Classe',
+             # 'Ano.construção',
+             'Código.ABC',
+             'Tensão',
+             'Tipo.Instalação',
+             'ValMed.PosTCont'
+          )
+for (fator in fatores) {
+    df[, fator] <- as.factor(df[, fator])
+}
+```
+
+
+```{r}
+mca.result <- mca(df[, fatores], nf = 5)
+```
+
+```{r}
+plot(x = 1:5, mca.result$d)
+```
+
+```{r}
+mca.result
+```
+```{r}
+mca_df <- data.frame(mca.result$cs)
+mca_df$variavel <- rownames(mca_df) %>% sapply(FUN = function(x) {
+    separado <- (x %>% strsplit('.', fixed=T))[[1]]
+    n <- length(separado)
+    return(paste(separado[1], collapse = '.'))
+})
+
+# MCA plot of variable categories
+mca_df %>% 
+    ggplot(aes(x = X1, y = X2, label = rownames(mca_df))) + 
+    geom_hline(yintercept = 0, colour = "gray70") +
+    geom_vline(xintercept = 0, colour = "gray70") +
+    geom_text(aes(colour = variavel))
+```
+
