@@ -62,5 +62,80 @@ mca_df %>%
     geom_hline(yintercept = 0, colour = "gray70") +
     geom_vline(xintercept = 0, colour = "gray70") +
     geom_text(aes(colour = variavel))
+
+
+# MCA plot of variable categories
+mca_df %>% 
+    ggplot(aes(x = X1, y = X3, label = rownames(mca_df))) + 
+    geom_hline(yintercept = 0, colour = "gray70") +
+    geom_vline(xintercept = 0, colour = "gray70") +
+    geom_text(aes(colour = variavel))
+
+# MCA plot of variable categories
+mca_df %>% 
+    ggplot(aes(x = X1, y = X4, label = rownames(mca_df))) + 
+    geom_hline(yintercept = 0, colour = "gray70") +
+    geom_vline(xintercept = 0, colour = "gray70") +
+    geom_text(aes(colour = variavel))
+
+
+# MCA plot of variable categories
+mca_df %>% 
+    ggplot(aes(x = X1, y = X5, label = rownames(mca_df))) + 
+    geom_hline(yintercept = 0, colour = "gray70") +
+    geom_vline(xintercept = 0, colour = "gray70") +
+    geom_text(aes(colour = variavel))
+```
+```{r}
+library(ggmosaic)
+
+df %>% 
+    ggplot() +
+    geom_mosaic(aes(x = product(`Tipo.Instalação`), fill = `Tensão`)) +
+    theme_mosaic() +
+    theme(axis.text.x = element_text(angle = 90))
+
+
+df %>% 
+    ggplot() +
+    geom_mosaic(aes(x = product(`Código.ABC`), fill = `Tensão`)) +
+    theme_mosaic() +
+    theme(axis.text.x = element_text(angle = 90))
+
+
+
+df %>% 
+    ggplot() +
+    geom_mosaic(aes(x = product(`Código.ABC`), fill = `Tipo.Instalação`)) +
+    theme_mosaic() +
+    theme(axis.text.x = element_text(angle = 90))
+```
+```{r}
+df$maior <- df$ValMed.PosTCont >= df$LimInfIntMed.
+df$menor <- df$ValMed.PosTCont <= df$LimSupIntMed.
+df$dentro <- df$maior & df$menor
+df$avaliacao <- df$Texto %>% as.numeric()
+```
+
+```{r}
+df.sem_na <- df[df$avaliacao <= 5, c('menor', 'maior', 'dentro', 'avaliacao')]
+df.sem_na <- df.sem_na[complete.cases(df.sem_na), ]
+model <- lm(avaliacao ~ dentro + menor + maior, df.sem_na)
+model %>% summary()
+```
+```{r}
+plot(model)
+```
+```{r}
+mean(round(model$fitted.values) == df.sem_na$avaliacao, na.rm = T)
+```
+```{r}
+confusion_matrix <- as.data.frame(table(round(model$fitted.values), df.sem_na$avaliacao))
+
+confusion_matrix %>%
+    ggplot(aes(x = Var1, y = Var2)) +
+    geom_tile(aes(fill = Freq)) +
+    geom_text(aes(label = sprintf("%1.0f", Freq)), vjust = 1) +
+    scale_fill_gradient(low = "blue", high = "red")
 ```
 

@@ -1,0 +1,4 @@
+*.ipynb
+poetry.lock
+pyproject.toml
+dados/*
